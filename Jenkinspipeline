@@ -7,7 +7,7 @@ git branch: 'development', credentialsId: '4f12112b-8d0b-44a8-b945-e4421a7606d2'
 }
 stage('build')
 {
-sh "${mavenHome}/bin/mvn clean package"
+sh "${mavenHome}/bin/mvn clean package1"
 }
 stage("executesonarqubereport")
 {
