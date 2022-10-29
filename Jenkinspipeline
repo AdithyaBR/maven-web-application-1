@@ -59,4 +59,5 @@ def slackNotifications(String buildStatus = 'STARTED') {
 
   // Send notifications
   slackSend (color: colorCode, message: summary)
+  slackSend channel: '#build-notifications', teamDomain: 'aditechsolutions', tokenCredentialId: '461ae308-08c0-4430-802b-9946bb2eabde'
 }
