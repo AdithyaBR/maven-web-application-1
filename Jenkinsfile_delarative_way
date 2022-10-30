@@ -1,0 +1,81 @@
+pipeline{
+agent any
+triggers {
+  pollSCM '* * * * *'
+  //cronjob '* * * * *'
+}
+options {
+timestamps()
+buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '3', numToKeepStr: '3')
+}
+
+tools{
+maven 'maven3.8.6'    
+}
+
+stages {
+stage('checkoutcode'){
+steps{
+slackNotifications('STARTED')
+git branch: 'development', credentialsId: '4f12112b-8d0b-44a8-b945-e4421a7606d2', url: 'https://github.com/AdithyaBR/maven-web-application-1.git'
+
+}
+}
+
+stage('build and sonarqube and nexus'){
+steps{
+
+sh "mvn clean sonar:sonar deploy"
+}
+}
+stage('deploytotomcat'){
+steps{
+sshagent(['7864ac9a-3333-4d8a-bf3f-2d66274fdbe3']) {
+sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.8.166:/opt/apache-tomcat-9.0.68/webapps/"    
+}
+}
+    
+}
+
+}//stages
+
+post {
+  success {
+  slackNotifications(currentBuild.result)
+    // One or more steps need to be included within each condition's block.
+  }
+  failure {
+  slackNotifications(currentBuild.result)
+    // One or more steps need to be included within each condition's block.
+  }
+}
+}//pipeline
+
+//code snippet for sending slack notifications
+
+def slackNotifications(String buildStatus = 'STARTED') {
+  // build status of null means successful
+  buildStatus =  buildStatus ?: 'SUCCESSFUL'
+
+  // Default values
+  def colorName = 'RED'
+  def colorCode = '#FF0000'
+  def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+  def summary = "${subject} (${env.BUILD_URL})"
+
+  // Override default values based on build status
+  if (buildStatus == 'STARTED') {
+    colorName = 'YELLOW'
+    colorCode = '#FFFF00'
+  } else if (buildStatus == 'SUCCESSFUL') {
+    colorName = 'GREEN'
+    colorCode = '#00FF00'
+  } else {
+    colorName = 'RED'
+    colorCode = '#FF0000'
+  }
+
+  // Send notifications
+  slackSend (channel:'#build-notifications', teamDomain:'aditechsolutions', tokenCredentialId:'92edbdad-91a8-467c-8479-566e434e2fc9', color:colorCode, message: summary)
+}
+
