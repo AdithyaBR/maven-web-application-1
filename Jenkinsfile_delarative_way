@@ -22,7 +22,7 @@ stages {
 stage('checkoutcode'){
 steps{
 slackNotifications('STARTED')
-git branch: '${params.BranchName}', credentialsId: '4f12112b-8d0b-44a8-b945-e4421a7606d2', url: 'https://github.com/AdithyaBR/maven-web-application-1.git'
+git branch: "${params.BranchName}", credentialsId: '4f12112b-8d0b-44a8-b945-e4421a7606d2', url: 'https://github.com/AdithyaBR/maven-web-application-1.git'
 
 } 
 }
