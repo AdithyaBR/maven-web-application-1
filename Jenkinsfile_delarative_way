@@ -4,6 +4,11 @@ triggers {
   pollSCM '* * * * *'
   //cronjob '* * * * *'
 }
+parameters {
+  choice choices: ['development', 'dev', 'master', 'stage'], description: 'Please enter the branchname', name: 'BranchName'
+  string defaultValue: 'Aditech', description: 'You can also enter the name of your Name', name: 'name'
+}
+
 options {
 timestamps()
 buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '3', numToKeepStr: '3')
@@ -17,11 +22,11 @@ stages {
 stage('checkoutcode'){
 steps{
 slackNotifications('STARTED')
-git branch: 'development', credentialsId: '4f12112b-8d0b-44a8-b945-e4421a7606d2', url: 'https://github.com/AdithyaBR/maven-web-application-1.git'
+git branch: '${params.BranchName}', credentialsId: '4f12112b-8d0b-44a8-b945-e4421a7606d2', url: 'https://github.com/AdithyaBR/maven-web-application-1.git'
 
+} 
 }
-}
-
+/* multi line comment since we have not enabled the other servers than jenkins
 stage('build and sonarqube and nexus'){
 steps{
 
@@ -35,7 +40,7 @@ sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@17
 }
 }
     
-}
+} */
 
 }//stages
 
